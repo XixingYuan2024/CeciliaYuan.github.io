@@ -1,0 +1,843 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leon Vasari — Filmography</title>
+<style>:root{
+  --paper:#EDEBE6;
+  --sheet:#F4F2ED;
+  --ink:#141414;
+  --muted:#6D6A63;
+  --cobalt:#1F3FB0;
+  --rule:rgba(20,20,20,.9);
+  --ease:cubic-bezier(.2,.8,.2,1);
+  --H:min(46vh,31vw);
+  --sans:"Inter Tight","Noto Sans JP",system-ui,"Microsoft YaHei",sans-serif;
+  --serif:"Newsreader",Georgia,"Songti SC","SimSun",serif;
+}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  overflow:hidden;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+button,a{font:inherit;color:inherit}
+.lbl{
+  font-family:var(--sans);
+  font-weight:600;
+  font-size:10.5px;
+  line-height:1;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.box{display:inline-flex;align-items:center;height:21px;padding:0 8px;border:1px solid var(--rule)}
+.jp{font-family:var(--sans)}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:fixed;left:0;right:0;top:0;height:84px;
+  padding:0 32px;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  z-index:20;
+}
+.back{justify-self:start;text-decoration:none;background:none;cursor:pointer}
+.topright{justify-self:end;display:flex;align-items:center;gap:14px}
+.career{font-weight:500}
+.lang{display:inline-flex;height:21px;border:1px solid var(--rule)}
+.lang button{
+  height:19px;padding:0 8px;margin-left:-1px;
+  background:transparent;border:1px solid transparent;border-left-color:var(--rule);
+  color:var(--ink);cursor:pointer;line-height:1;
+  transition:color .45s var(--ease),background-color .45s var(--ease);
+}
+.lang button:first-child{margin-left:0;border-left-color:transparent}
+.lang button.on{background:var(--cobalt);color:#fff;border-color:var(--cobalt);margin-left:-1px}
+.lang button.on:first-child{margin-left:0}
+.logo{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--cobalt)}
+.logo-cn{font-family:"Noto Serif SC",serif;font-weight:700;font-size:22px;line-height:1;letter-spacing:.04em}
+.logo-en{font-family:var(--sans);font-weight:600;font-size:9px;line-height:1;letter-spacing:.34em;padding-left:.34em}
+
+/* ---------- decade tabs ---------- */
+.decades{
+  position:fixed;left:50%;top:calc(50% - var(--H)/2 - 86px);
+  transform:translateX(-50%);
+  display:flex;align-items:center;height:23px;z-index:22;
+}
+.decades .indicator{
+  position:absolute;left:0;top:0;height:23px;width:0;
+  background:var(--cobalt);z-index:0;pointer-events:none;
+  transition:width .6s var(--ease),transform .6s var(--ease);
+}
+.decades button{
+  position:relative;z-index:1;
+  height:23px;padding:0 11px;margin-left:-1px;
+  background:transparent;border:1px solid var(--rule);
+  cursor:pointer;
+  transition:color .45s var(--ease);
+}
+.decades button:first-of-type{margin-left:0}
+.decades button.on{color:#fff}
+
+/* ---------- shelf ---------- */
+.shelf{
+  position:fixed;left:0;right:0;
+  top:calc(50% - var(--H)/2 - 40px);
+  height:calc(var(--H) + 80px);
+  perspective:2200px;
+  perspective-origin:50% 50%;
+  touch-action:pan-y;
+  z-index:10;
+}
+.stage{
+  position:absolute;left:50%;top:50%;width:0;height:0;
+  transform-style:preserve-3d;
+}
+.tape{
+  position:absolute;left:0;top:0;width:0;height:0;
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.face{
+  position:absolute;height:var(--H);top:calc(var(--H)/-2);
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:2px;
+  background-repeat:no-repeat;
+  background-color:#bdb8ad;
+}
+.face::after{
+  content:"";position:absolute;inset:0;border-radius:2px;
+  background:#000;opacity:var(--shade,0);pointer-events:none;
+}
+.face.sp{
+  width:var(--ws);left:calc(var(--ws)/-2);
+  transform:translateZ(calc(var(--d)/2));
+  cursor:pointer;
+}
+.face.cv{
+  width:var(--d);left:calc(var(--d)/-2);
+  transform:rotateY(90deg) translateZ(calc(var(--ws)/2));
+  box-shadow:0 30px 60px -28px rgba(20,16,10,.55);
+  cursor:pointer;
+}
+
+/* ---------- play ring ---------- */
+.play{
+  position:fixed;width:42px;height:42px;border-radius:50%;
+  border:1px solid var(--cobalt);
+  background:rgba(237,235,230,.75);
+  color:var(--cobalt);
+  display:grid;place-items:center;padding:0;
+  z-index:24;cursor:pointer;
+  will-change:transform;
+}
+.play .tri{
+  width:0;height:0;margin-left:2px;
+  border-top:6px solid transparent;
+  border-bottom:6px solid transparent;
+  border-left:12px solid currentColor;
+}
+
+/* ---------- caption ---------- */
+.caption{
+  position:fixed;left:50%;top:calc(50% + var(--H)/2 + 30px);
+  transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:9px;
+  pointer-events:none;z-index:20;
+}
+.mask{position:relative;overflow:hidden;width:min(92vw,760px);text-align:center}
+.cspan{display:block;white-space:nowrap}
+.caption-title .cspan{font-family:var(--serif);font-weight:400;font-size:31px;line-height:1.12;letter-spacing:-.01em}
+.caption-sub .cspan{color:var(--cobalt);font-weight:500;font-size:10.5px}
+.caption-year .cspan{font-weight:500;font-size:11px;letter-spacing:.08em}
+
+/* ---------- arrows ---------- */
+.arrow{
+  position:fixed;top:calc(50% + var(--H)/2 + 40px);
+  width:44px;height:44px;padding:0;
+  background:transparent;border:0;cursor:pointer;
+  display:grid;place-items:center;z-index:25;
+}
+.arrow.prev{left:20px}
+.arrow.next{right:20px}
+.arrow svg{width:18px;height:10px;overflow:visible}
+
+/* ---------- footer ---------- */
+.footer{
+  position:fixed;left:32px;right:32px;bottom:26px;
+  display:flex;justify-content:space-between;z-index:20;
+}
+.footer .lbl{font-weight:500}
+.footer a{text-decoration:none}
+
+/* ---------- grain ---------- */
+.grain{
+  position:fixed;inset:0;z-index:40;pointer-events:none;
+  mix-blend-mode:multiply;opacity:.55;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 .45 0 0 0 0 .42 0 0 0 0 .38 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size:220px 220px;
+}
+
+/* ---------- cursor ---------- */
+.cursor{
+  position:fixed;left:0;top:0;width:58px;height:58px;
+  margin:-29px 0 0 -29px;z-index:100;pointer-events:none;
+  will-change:transform;
+}
+.cursor .ring{
+  position:absolute;inset:0;border:1.5px solid var(--ink);border-radius:50%;
+  background:transparent;
+  transition:transform .5s var(--ease),background-color .4s var(--ease),border-color .4s var(--ease);
+}
+.cursor .dot{
+  position:absolute;left:26px;top:26px;width:6px;height:6px;border-radius:50%;
+  background:var(--ink);transition:transform .4s var(--ease);
+}
+.cursor .clabel{
+  position:absolute;inset:0;display:grid;place-content:center;
+  color:#fff;font-weight:600;font-size:10px;line-height:1.25;letter-spacing:.1em;
+  text-align:center;transform:scale(0);transition:transform .45s var(--ease);
+}
+.cursor.spine .ring{transform:scale(.72)}
+.cursor.btn .ring{transform:scale(.55)}
+.cursor.btn .dot{transform:scale(0)}
+.cursor.open .ring{transform:scale(1.75);background:var(--cobalt);border-color:var(--cobalt)}
+.cursor.open .dot{transform:scale(0)}
+.cursor.open .clabel{transform:scale(1)}
+@media (pointer:fine){
+  html,body,button,a{cursor:none}
+}
+@media (pointer:coarse){.cursor{display:none}}
+
+/* ---------- detail ---------- */
+.detail{
+  position:fixed;inset:0;z-index:60;
+  background:var(--sheet);
+  visibility:hidden;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:minmax(0,1fr);
+  column-gap:4vw;
+  padding:110px 6vw 56px 7vw;
+  will-change:clip-path,transform;
+}
+.detail .close{position:absolute;left:32px;top:31px;background:none;cursor:pointer;z-index:3}
+.detail-lang{position:absolute;right:32px;top:31px;z-index:3}
+.detail .dlogo{
+  position:absolute;left:0;right:0;top:0;height:84px;
+  display:flex;align-items:center;justify-content:center;
+}
+.dgrid{display:contents}
+.dleft{
+  align-self:center;justify-self:end;min-height:0;
+  width:100%;max-width:520px;
+  display:flex;flex-direction:column;gap:18px;
+}
+.dmask{overflow:hidden}
+.dline{will-change:transform}
+.dsub{color:var(--cobalt);font-weight:500}
+.dtitle{font-family:var(--serif);font-weight:400;font-size:clamp(44px,5.4vw,84px);line-height:1;letter-spacing:-.025em}
+.dmeta{color:var(--muted);font-weight:500}
+.dsyn{font-family:var(--serif);font-weight:400;font-size:17px;line-height:1.5;max-width:42ch}
+.dcredit{font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.4;color:var(--muted)}
+.watchmask{margin-top:10px}
+.watch{
+  height:44px;padding:0 20px;
+  border:1px solid var(--cobalt);background:transparent;color:var(--cobalt);
+  cursor:pointer;
+}
+.dright{display:flex;align-items:center;justify-content:center;min-width:0;min-height:0}
+#poster{height:min(78vh,calc(100vh - 166px));width:auto;max-width:100%;max-height:100%;display:block;overflow:visible}
+
+/* ---------- responsive ---------- */
+@media (max-width:767px){
+  :root{--H:min(60vw,40svh)}
+  .topbar{height:64px;padding:0 16px}
+  .logo-cn{font-size:17px}
+  .logo-en{font-size:7.5px}
+  .career{display:none}
+  .lbl{font-size:9px}
+  .decades{top:calc(50% - var(--H)/2 - 70px)}
+  .decades button{padding:0 7px;font-size:9px}
+  .caption-title .cspan{font-size:24px}
+  .arrow.prev{left:6px}
+  .arrow.next{right:6px}
+  .footer{left:16px;right:16px;bottom:18px}
+  .detail{
+    display:block;overflow-y:auto;
+    padding:84px 22px 40px;
+  }
+  .detail .dlogo{height:64px}
+  .detail .close{left:16px;top:21px}
+  .detail-lang{right:16px;top:21px}
+  .detail .dgrid{display:flex;flex-direction:column;gap:24px}
+  .dright{order:-1;width:100%}
+  #poster{height:46svh}
+  .dleft{width:100%;max-width:none;gap:16px}
+  .dtitle{font-size:42px}
+  .dsyn{font-size:16px}
+}
+@media (prefers-reduced-motion:reduce){
+  .decades .indicator,.decades button,.cursor .ring,.cursor .dot,.cursor .clabel{transition-duration:1ms}
+}
+</style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@1,6..72,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500&text=%E2%80%99%E3%80%9C%E3%81%84%E3%81%8B%E3%81%8F%E3%81%98%E3%81%99%E3%81%9F%E3%81%A1%E3%81%A6%E3%81%AA%E3%81%AE%E3%81%B9%E3%82%8B%E3%82%92%E4%BA%89%E4%BD%9C%E5%88%BB%E5%8D%88%E5%93%81%E5%A1%A9%E5%A4%8F%E5%AF%9F%E5%B5%90%E5%B7%9D%E5%B9%B4%E5%BE%8C%E6%88%A6%E6%88%BB%E6%89%89%E6%98%A0%E6%9C%80%E6%AD%A3%E6%BD%AE%E7%81%AF%E7%81%B0%E7%94%BB%E7%9B%A3%E7%9D%A3%E7%B7%91%E8%80%85%E8%90%BD%E8%A6%8B%E8%A6%B3%E8%B0%B7%E8%B5%A4%E9%81%93%E9%95%B7%E9%96%89%E9%96%8B%E9%9D%92%E9%9D%99%E9%B3%A5&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&text=%E8%8E%B1%E6%98%82%C2%B7%E7%93%A6%E8%90%A8%E9%87%8C&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="lbl box back" href="#" id="back" aria-label="Back">BACK / <span class="jp">戻る</span></a>
+  <div class="logo" aria-label="Leon Vasari">
+    <span class="logo-cn">莱昂·瓦萨里</span>
+    <span class="logo-en">LEON VASARI</span>
+  </div>
+  <div class="topright">
+    <div class="lbl career" id="career">CAREER 1958年〜1989年</div>
+    <div class="lang" id="lang" role="group" aria-label="Language">
+      <button type="button" class="lbl on" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" class="lbl" data-lang="zh" aria-pressed="false">中</button>
+    </div>
+  </div>
+</header>
+
+<nav class="decades" id="decades" aria-label="Decades">
+  <span class="indicator" id="indicator"></span>
+  <button type="button" data-decade="all" class="lbl" id="tabAll">All / <span class="jp">すべて</span></button>
+  <button type="button" data-decade="1950" class="lbl">1950s</button>
+  <button type="button" data-decade="1960" class="lbl">1960s</button>
+  <button type="button" data-decade="1970" class="lbl">1970s</button>
+  <button type="button" data-decade="1980" class="lbl">1980s</button>
+</nav>
+
+<section class="shelf" id="shelf" aria-label="Filmography shelf">
+  <div class="stage" id="stage"></div>
+</section>
+
+<button type="button" class="play" id="play" aria-label="Open film"><span class="tri"></span></button>
+
+<div class="caption" aria-live="polite">
+  <div class="mask caption-title" id="capTitle"></div>
+  <div class="mask caption-sub" id="capSub"></div>
+  <div class="mask caption-year" id="capYear"></div>
+</div>
+
+<button type="button" class="arrow prev" id="prev" aria-label="Previous film">
+  <svg viewBox="0 0 18 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M5 1 L1 5 L5 9 M1 5 H17"/></svg>
+</button>
+<button type="button" class="arrow next" id="next" aria-label="Next film">
+  <svg viewBox="0 0 18 10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M13 1 L17 5 L13 9 M17 5 H1"/></svg>
+</button>
+
+<footer class="footer">
+  <span class="lbl" id="copyright">© LEON VASARI. ALL RIGHTS RESERVED.</span>
+  <span class="lbl"><a href="#">FB</a> / <a href="#">TW</a></span>
+</footer>
+
+<div class="grain" aria-hidden="true"></div>
+
+<div class="cursor" id="cursor" aria-hidden="true">
+  <div class="ring"></div>
+  <div class="dot"></div>
+  <div class="clabel" id="curLabel">OPEN<br>開く</div>
+</div>
+
+<div class="detail" id="detail" role="dialog" aria-modal="true" aria-label="Film detail">
+  <button type="button" class="lbl box close" id="close">CLOSE / <span class="jp">閉じる</span></button>
+  <div class="lang detail-lang" id="lang2" role="group" aria-label="Language">
+    <button type="button" class="lbl on" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" class="lbl" data-lang="zh" aria-pressed="false">中</button>
+  </div>
+  <div class="dlogo" aria-hidden="true">
+    <div class="logo">
+      <span class="logo-cn">莱昂·瓦萨里</span>
+      <span class="logo-en">LEON VASARI</span>
+    </div>
+  </div>
+  <div class="dgrid">
+    <div class="dleft">
+      <div class="dmask"><div class="dline lbl dsub" id="dSub"></div></div>
+      <div class="dmask"><div class="dline dtitle" id="dTitle"></div></div>
+      <div class="dmask"><div class="dline lbl dmeta" id="dMeta"></div></div>
+      <div class="dmask"><div class="dline dsyn" id="dSyn"></div></div>
+      <div class="dmask"><div class="dline dcredit" id="dcredit">Written and directed by Leon Vasari. <span class="jp">監督作品</span></div></div>
+      <div class="dmask watchmask"><button type="button" class="lbl watch dline" id="watch">WATCH THE FILM / <span class="jp">映画を見る</span></button></div>
+    </div>
+    <div class="dright">
+      <svg id="poster" viewBox="0 0 474 900" aria-hidden="true">
+        <defs>
+          <clipPath id="posterClip"><rect x="0" y="0" width="474" height="900"/></clipPath>
+          <filter id="ink" x="-60%" y="-60%" width="220%" height="220%">
+            <feTurbulence type="fractalNoise" baseFrequency=".011" numOctaves="3" seed="7" result="noise"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="120" xChannelSelector="R" yChannelSelector="G"/>
+          </filter>
+          <mask id="inkMask" maskUnits="userSpaceOnUse" x="-200" y="-200" width="874" height="1300">
+            <g id="blobs" filter="url(#ink)" fill="#fff">
+              <circle cx="150" cy="330" r="0"/><circle cx="340" cy="600" r="0"/>
+              <circle cx="250" cy="120" r="0"/><circle cx="90" cy="760" r="0"/>
+              <circle cx="400" cy="250" r="0"/><circle cx="260" cy="860" r="0"/>
+              <circle cx="230" cy="470" r="0"/>
+            </g>
+          </mask>
+        </defs>
+        <g clip-path="url(#posterClip)" mask="url(#inkMask)">
+          <image id="posterImg" preserveAspectRatio="none"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------------- data ---------------- */
+const FILMS=[
+ {id:'valley',title:'The Silent Valley',romaji:'SHIZUKANA TANI',kanji:'静かな谷',year:1958,genre:'Drama',minutes:104,synopsis:'A schoolteacher returns to the mountain village that exiled her father, and finds the valley has kept every one of its secrets.'},
+ {id:'bluehour',title:'The Blue Hour',romaji:'AO NO TOKI',kanji:'青の刻',year:1962,genre:'Romance',minutes:97,synopsis:'Over one long evening in a harbour town, a widow and a stranger trade small lies until the light runs out.'},
+ {id:'river',title:'River of Salt',romaji:'SHIO NO KAWA',kanji:'塩の川',year:1964,genre:'Drama',minutes:121,synopsis:'Two brothers drag a salt barge downriver to a city that no longer wants anything they carry.'},
+ {id:'summer',title:'The Last Summer',romaji:'SAIGO NO NATSU',kanji:'最後の夏',year:1966,genre:'Drama',minutes:109,synopsis:'The summer before the dam floods their village, three friends set fire to everything they cannot take with them.'},
+ {id:'green',title:'The Green Road',romaji:'MIDORI NO MICHI',kanji:'緑の道',year:1969,genre:'Mystery',minutes:101,synopsis:'A surveyor mapping a forest road keeps finding the same footprints, always one day ahead of him.'},
+ {id:'noon',title:'Noon in Ashes',romaji:'HAI NO SHOGO',kanji:'灰の正午',year:1971,genre:'Western',minutes:112,synopsis:'A rider crosses a white desert to settle an old debt, and learns too late who sent him.'},
+ {id:'observer',title:'The Observer',romaji:'KANSATSUSHA',kanji:'観察者',year:1973,genre:'Thriller',minutes:96,synopsis:'A night watchman begins to suspect that the building he guards has started watching him back.'},
+ {id:'birds',title:'The Fallen Birds',romaji:'OCHITA TORI',kanji:'落ちた鳥',year:1975,genre:'Drama',minutes:118,synopsis:"When the birds stop singing over a frontier town, the mayor's daughter is the only one who goes looking for the reason."},
+ {id:'storm',title:'Light in the Storm',romaji:'ARASHI NO HI',kanji:'嵐の灯',year:1978,genre:'Drama',minutes:127,synopsis:'A lighthouse keeper and his son wait out a three-day storm with a shipwrecked sailor who will not give his name.'},
+ {id:'tide',title:'The Long Tide',romaji:'NAGAI SHIO',kanji:'長い潮',year:1981,genre:'Drama',minutes:99,synopsis:"A fisherman's wife counts the tides on the harbour wall while her husband's boat fails to come home."},
+ {id:'war',title:'A Quiet War',romaji:'SHIZUKANA SENSO',kanji:'静かな戦争',year:1985,genre:'Comedy',minutes:103,synopsis:'Two neighbours fight a silent war over a garden wall for thirty years, and neither will say how it began.'},
+ {id:'door',title:'Red Door',romaji:'AKAI TOBIRA',kanji:'赤い扉',year:1989,genre:'Thriller',minutes:114,synopsis:'A projectionist follows a reel of unknown film through the corridors of a cinema on its final night.'}
+];
+
+/* ---------------- i18n ---------------- */
+const ZH={
+ valley:{title:'寂静的山谷',genre:'剧情',synopsis:'一位教师回到曾放逐她父亲的山村，却发现山谷保守着它所有的秘密。'},
+ bluehour:{title:'蓝色时刻',genre:'爱情',synopsis:'在港口小镇的一个漫长夜晚，一位寡妇与一个陌生人交换着细小的谎言，直到天光散尽。'},
+ river:{title:'盐之河',genre:'剧情',synopsis:'两兄弟拖着一艘盐船顺流而下，驶向一座已不再需要他们货物的城市。'},
+ summer:{title:'最后的夏天',genre:'剧情',synopsis:'大水淹没村庄前的那个夏天，三个朋友点燃了所有带不走的东西。'},
+ green:{title:'绿色之路',genre:'悬疑',synopsis:'一位测绘森林道路的测量员不断发现同一串脚印，而且总是比他早一天。'},
+ noon:{title:'灰烬正午',genre:'西部',synopsis:'一位骑手穿越白色沙漠去偿还旧债，却为时已晚地发现是谁派他前来。'},
+ observer:{title:'观察者',genre:'惊悚',synopsis:'一位守夜人开始怀疑，他所看守的大楼是否已开始反过来注视他。'},
+ birds:{title:'坠落的鸟',genre:'剧情',synopsis:'当边陲小镇上空的鸟儿停止歌唱，镇长的女儿是唯一一个去寻找原因的人。'},
+ storm:{title:'风暴中的光',genre:'剧情',synopsis:'一位灯塔看守人与儿子，同一位不肯说出姓名的落难水手，一起熬过三天的风暴。'},
+ tide:{title:'漫长的潮汐',genre:'剧情',synopsis:'一位渔夫的妻子在港口的堤墙上数着潮汐，而丈夫的船始终没有返航。'},
+ war:{title:'寂静的战争',genre:'喜剧',synopsis:'两位邻居为一道花园墙展开了一场长达三十年的无声战争，谁也不肯说出它是如何开始的。'},
+ door:{title:'红色的门',genre:'惊悚',synopsis:'一位放映员循着一卷来历不明的胶片，走过电影院最后一个夜晚的走廊。'}
+};
+const UI={
+ back:{en:'BACK / <span class="jp">戻る</span>',zh:'返回 / <span class="jp">戻る</span>'},
+ career:{en:'CAREER 1958年〜1989年',zh:'生涯 1958年〜1989年'},
+ tabAll:{en:'All / <span class="jp">すべて</span>',zh:'全部 / <span class="jp">すべて</span>'},
+ copyright:{en:'© LEON VASARI. ALL RIGHTS RESERVED.',zh:'© 莱昂·瓦萨里。保留所有权利。'},
+ curLabel:{en:'OPEN<br>開く',zh:'打开<br>開く'},
+ close:{en:'CLOSE / <span class="jp">閉じる</span>',zh:'关闭 / <span class="jp">閉じる</span>'},
+ watch:{en:'WATCH THE FILM / <span class="jp">映画を見る</span>',zh:'观看影片 / <span class="jp">映画を見る</span>'},
+ dcredit:{en:'Written and directed by Leon Vasari. <span class="jp">監督作品</span>',zh:'编剧并执导：莱昂·瓦萨里。<span class="jp">監督作品</span>'},
+ docTitle:{en:'Leon Vasari — Filmography',zh:'莱昂·瓦萨里 — 电影作品'},
+ aria:{
+   back:{en:'Back',zh:'返回'},play:{en:'Open film',zh:'打开影片'},
+   prev:{en:'Previous film',zh:'上一部影片'},next:{en:'Next film',zh:'下一部影片'},
+   decades:{en:'Decades',zh:'年代'},shelf:{en:'Filmography shelf',zh:'电影作品书架'},
+   detail:{en:'Film detail',zh:'影片详情'},lang:{en:'Language',zh:'语言'}
+ }
+};
+
+const SHEET={
+ covers:['https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261029_010644_837e04ca-2418-45c1-b8e0-0233265c4cd5.png&w=1744&q=85',1744,2336],
+ spines:['https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261029_010738_a3e47ead-18f2-4974-9468-06d16a25edc5.png&w=2688&q=85',2688,1152],
+ fix:['https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261029_010831_3ebb874b-93dc-433e-87ed-6299aba720f0.png&w=1520&q=85',1520,2688],
+ fix2:['https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_20261029_092020_f96bc094-db7b-46de-9298-074a24e0a3b8.png&w=1520&q=85',1520,2688]
+};
+
+const CROP={
+ 'spine-valley':['spines',266,31,189,1089],'cover-valley':['covers',497,72,344,659],
+ 'spine-bluehour':['spines',492,31,189,1089],'cover-bluehour':['covers',914,72,342,659],
+ 'spine-river':['fix',197,54,324,2566],'cover-river':['covers',1332,72,344,659],
+ 'spine-summer':['spines',937,31,188,1089],'cover-summer':['covers',74,813,344,676],
+ 'spine-green':['spines',1157,31,185,1090],'cover-green':['covers',497,815,344,674],
+ 'spine-noon':['spines',44,32,184,1088],'cover-noon':['covers',74,72,347,659],
+ 'spine-observer':['fix2',371,15,349,2655],'cover-observer':['covers',915,815,342,675],
+ 'spine-birds':['spines',1573,31,183,1089],'cover-birds':['covers',1331,815,345,675],
+ 'spine-storm':['fix2',808,15,347,2656],'cover-storm':['covers',74,1571,345,681],
+ 'spine-tide':['spines',2012,31,188,1089],'cover-tide':['covers',496,1577,343,678],
+ 'spine-war':['spines',2236,31,189,1089],'cover-war':['covers',913,1579,343,676],
+ 'spine-door':['spines',2462,31,188,1089],'cover-door':['covers',1331,1579,344,677]
+};
+
+const BLOBS=[{delay:0},{delay:120},{delay:220},{delay:300},{delay:360},{delay:420},{delay:180}];
+const EASE='cubic-bezier(.2,.8,.2,1)';
+const OPEN_EASE='cubic-bezier(.76,0,.18,1)';
+const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- elements ---------------- */
+const $=id=>document.getElementById(id);
+const stage=$('stage'), shelf=$('shelf'), play=$('play'), cursor=$('cursor');
+const detail=$('detail'), posterImg=$('posterImg');
+const blobEls=[...document.querySelectorAll('#blobs circle')];
+const dlines=[...document.querySelectorAll('.dline')];
+const capMasks=[$('capTitle'),$('capSub'),$('capYear')];
+const tabButtons=[...document.querySelectorAll('#decades button')];
+const indicator=$('indicator');
+
+/* ---------------- geometry ---------------- */
+let H=0,ws=0,d=0,gap=0,W=window.innerWidth;
+function measure(){
+  const probe=document.createElement('div');
+  probe.style.cssText='position:fixed;left:-9999px;top:-9999px;width:0;height:var(--H);visibility:hidden;pointer-events:none';
+  document.body.appendChild(probe);
+  H=probe.getBoundingClientRect().height||400;
+  probe.remove();
+  W=window.innerWidth;
+  ws=H*142/840;
+  d=H*474/900;
+  gap=H*.03;
+  stage.style.setProperty('--ws',ws+'px');
+  stage.style.setProperty('--d',d+'px');
+  positionPlay();
+}
+function positionPlay(){
+  play.style.left=(W/2-.5*d-6)+'px';
+  play.style.top=(window.innerHeight/2+.36*H)+'px';
+}
+
+/* ---------------- tape construction ---------------- */
+function paintCrop(el,key){
+  const c=CROP[key], sheet=SHEET[c[0]];
+  const url=sheet[0],SW=sheet[1],SH=sheet[2];
+  const x=c[1],y=c[2],w=c[3],h=c[4];
+  el.style.backgroundImage='url("'+url+'")';
+  el.style.backgroundSize=(SW/w*100)+'% '+(SH/h*100)+'%';
+  el.style.backgroundPosition=(x/(SW-w)*100)+'% '+(y/(SH-h)*100)+'%';
+}
+const tapes=[];
+const lifts=new Float32Array(36);
+for(let copy=0;copy<3;copy++){
+  for(let i=0;i<12;i++){
+    const v=copy*12+i, film=FILMS[i];
+    const el=document.createElement('div');
+    el.className='tape';el.dataset.v=v;
+    const sp=document.createElement('div');sp.className='face sp';
+    const cv=document.createElement('div');cv.className='face cv';
+    paintCrop(sp,'spine-'+film.id);
+    paintCrop(cv,'cover-'+film.id);
+    el.appendChild(sp);el.appendChild(cv);
+    el.addEventListener('pointerenter',()=>{hover=v});
+    el.addEventListener('pointerleave',()=>{if(hover===v)hover=-1});
+    el.addEventListener('click',()=>{
+      if(suppressClick)return;
+      const r=relIndex(v);
+      if(Math.abs(r)<.5)openDetail();
+      else T=Math.round(T+r);
+    });
+    stage.appendChild(el);
+    tapes.push({v,el,sp,cv});
+  }
+}
+
+/* ---------------- state ---------------- */
+let s=17,T=17,hover=-1,active=-1,lastDir=1;
+let lang='en';
+try{lang=localStorage.getItem('lv-lang')==='zh'?'zh':'en'}catch(e){}
+let mx=W/2,my=window.innerHeight/2,cx=mx,cy=my;
+let tiltX=0,tiltY=0,onCover=false,isOpen=false,overControl=false;
+let drag=null,suppressClick=false,wheelTimer=null;
+let inkActive=false,inkStart=0,detailAnims=[];
+
+Object.values(SHEET).forEach(function(sheet){const im=new Image();im.src=sheet[0]});
+
+const mod=(a,n)=>((a%n)+n)%n;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function smooth(x){return x*x*(3-2*x)}
+function B(r){return Math.abs(r)<1?(r+Math.sin(Math.PI*r)/Math.PI)/2:(r>0?.5:-.5)}
+function relIndex(v){return mod(v-s+18,36)-18}
+
+/* ---------------- caption + tabs ---------------- */
+function setLine(mask,text,dir,animate){
+  if(!animate||reduce){
+    mask.textContent='';
+    const el=document.createElement('span');el.className='cspan';el.textContent=text;mask.appendChild(el);
+    return;
+  }
+  [...mask.children].forEach(function(old){
+    if(old.dataset.leaving)return;
+    old.dataset.leaving='1';
+    old.style.position='absolute';old.style.left='0';old.style.top='0';old.style.width='100%';
+    let from='translateY(0px)';
+    try{const m=new DOMMatrixReadOnly(getComputedStyle(old).transform);from='translateY('+m.m42+'px)'}catch(e){}
+    const a=old.animate([{transform:from},{transform:'translateY('+(-dir*105)+'%)'}],
+      {duration:650,easing:EASE,fill:'both'});
+    a.onfinish=()=>old.remove();
+  });
+  const el=document.createElement('span');el.className='cspan';el.textContent=text;
+  mask.appendChild(el);
+  el.animate([{transform:'translateY('+(dir*105)+'%)'},{transform:'translateY(0%)'}],
+    {duration:650,easing:EASE,fill:'both'});
+}
+function filmTitle(f){return lang==='zh'&&ZH[f.id]?ZH[f.id].title:f.title}
+function fillDetail(f){
+  const z=lang==='zh'&&ZH[f.id]?ZH[f.id]:null;
+  const genre=z?z.genre:f.genre.toUpperCase();
+  const syn=z?z.synopsis:f.synopsis;
+  $('dSub').textContent=f.romaji+' / '+f.kanji;
+  $('dTitle').textContent=filmTitle(f);
+  $('dMeta').textContent=f.year+' / '+genre+' / '+f.minutes+(lang==='zh'?' 分钟':' MIN');
+  $('dSyn').textContent=syn;
+  const c=CROP['cover-'+f.id],sheet=SHEET[c[0]];
+  posterImg.setAttribute('href',sheet[0]);
+  posterImg.setAttribute('x',-c[1]*474/c[3]);
+  posterImg.setAttribute('y',-c[2]*900/c[4]);
+  posterImg.setAttribute('width',sheet[1]*474/c[3]);
+  posterImg.setAttribute('height',sheet[2]*900/c[4]);
+}
+function setActive(i,dir){
+  active=i;
+  const f=FILMS[i];
+  setLine(capMasks[0],filmTitle(f),dir,true);
+  setLine(capMasks[1],f.romaji+' / '+f.kanji,dir,true);
+  setLine(capMasks[2],String(f.year),dir,true);
+  updateTabs(i);
+}
+function updateTabs(i){
+  const dec=String(Math.floor(FILMS[i].year/10)*10);
+  tabButtons.forEach(function(b){
+    const on=b.dataset.decade===dec;
+    b.classList.toggle('on',on);
+    if(on){
+      indicator.style.width=b.offsetWidth+'px';
+      indicator.style.transform='translateX('+b.offsetLeft+'px)';
+    }
+  });
+}
+function applyLang(){
+  const en=lang==='en';
+  document.documentElement.lang=en?'en':'zh-CN';
+  document.title=UI.docTitle[lang];
+  $('back').innerHTML=UI.back[lang];
+  $('career').textContent=UI.career[lang];
+  $('tabAll').innerHTML=UI.tabAll[lang];
+  $('copyright').textContent=UI.copyright[lang];
+  $('curLabel').innerHTML=UI.curLabel[lang];
+  $('close').innerHTML=UI.close[lang];
+  $('watch').innerHTML=UI.watch[lang];
+  $('dcredit').innerHTML=UI.dcredit[lang];
+  $('back').setAttribute('aria-label',UI.aria.back[lang]);
+  play.setAttribute('aria-label',UI.aria.play[lang]);
+  $('prev').setAttribute('aria-label',UI.aria.prev[lang]);
+  $('next').setAttribute('aria-label',UI.aria.next[lang]);
+  $('decades').setAttribute('aria-label',UI.aria.decades[lang]);
+  shelf.setAttribute('aria-label',UI.aria.shelf[lang]);
+  detail.setAttribute('aria-label',UI.aria.detail[lang]);
+  [ $('lang'),$('lang2') ].forEach(function(g){
+    g.setAttribute('aria-label',UI.aria.lang[lang]);
+    [...g.querySelectorAll('button')].forEach(function(b){
+      const on=b.dataset.lang===lang;
+      b.classList.toggle('on',on);
+      b.setAttribute('aria-pressed',on?'true':'false');
+    });
+  });
+  const f=FILMS[active];
+  if(isOpen)fillDetail(f);
+  updateTabs(active);
+  try{localStorage.setItem('lv-lang',lang)}catch(e){}
+}
+[$('lang'),$('lang2')].forEach(function(g){
+  g.addEventListener('click',function(e){
+    const b=e.target.closest('button');
+    if(!b||!b.dataset.lang||b.dataset.lang===lang)return;
+    lang=b.dataset.lang;
+    applyLang();
+    setLine(capMasks[0],filmTitle(FILMS[active]),1,false);
+  });
+});
+setActive(5,1);
+applyLang();
+
+/* ---------------- detail ---------------- */
+function activeTape(){const v=mod(Math.round(s),36);return tapes[v]}
+function coverRect(){return activeTape().cv.getBoundingClientRect()}
+function insetFor(r){
+  return 'inset('+r.top+'px '+(window.innerWidth-r.right)+'px '+
+    (window.innerHeight-r.bottom)+'px '+r.left+'px round 3px)';
+}
+function openDetail(){
+  if(isOpen)return;
+  isOpen=true;
+  T=Math.round(T);s=T;
+  const f=FILMS[active];
+  fillDetail(f);
+  blobEls.forEach(c=>c.setAttribute('r',0));
+  const r=coverRect();
+  detail.style.visibility='visible';
+  detail.style.transformOrigin=(r.left+r.width/2)+'px '+(r.top+r.height/2)+'px';
+  const a=detail.animate([
+    {clipPath:insetFor(r),transform:'rotate(-4.5deg)'},
+    {clipPath:'inset(0px 0px 0px 0px round 0px)',transform:'rotate(0deg)'}
+  ],{duration:reduce?1:1050,easing:OPEN_EASE,fill:'both'});
+  detailAnims.push(a);
+  dlines.forEach(function(line,i){
+    detailAnims.push(line.animate(
+      [{transform:'translateY(110%)'},{transform:'translateY(0%)'}],
+      {duration:reduce?1:900,delay:reduce?0:620+i*75,easing:EASE,fill:'both'}));
+  });
+  inkStart=performance.now()+(reduce?-5000:0);
+  inkActive=true;
+}
+function closeDetail(){
+  if(!isOpen)return;
+  const r=coverRect();
+  detail.style.transformOrigin=(r.left+r.width/2)+'px '+(r.top+r.height/2)+'px';
+  const a=detail.animate([
+    {clipPath:'inset(0px 0px 0px 0px round 0px)',transform:'rotate(0deg)'},
+    {clipPath:insetFor(r),transform:'rotate(-4.5deg)'}
+  ],{duration:reduce?1:850,easing:OPEN_EASE,fill:'both'});
+  a.onfinish=function(){
+    detail.style.visibility='hidden';
+    detailAnims.forEach(an=>an.cancel());
+    detailAnims=[];
+    inkActive=false;isOpen=false;
+  };
+}
+
+/* ---------------- input ---------------- */
+$('prev').addEventListener('click',()=>{if(!isOpen)T=Math.round(T)-1});
+$('next').addEventListener('click',()=>{if(!isOpen)T=Math.round(T)+1});
+play.addEventListener('click',openDetail);
+$('close').addEventListener('click',closeDetail);
+
+tabButtons.forEach(function(b){
+  b.addEventListener('click',()=>{
+    if(isOpen)return;
+    const target=b.dataset.decade==='all'?0:FILMS.findIndex(f=>Math.floor(f.year/10)*10===Number(b.dataset.decade));
+    if(target<0)return;
+    const cur=mod(Math.round(T),12);
+    let diff=mod(target-cur,12);
+    if(diff>6)diff-=12;
+    T=Math.round(T)+diff;
+  });
+});
+
+window.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){closeDetail();return}
+  if(isOpen)return;
+  if(e.key==='ArrowLeft'){T=Math.round(T)-1;e.preventDefault()}
+  else if(e.key==='ArrowRight'){T=Math.round(T)+1;e.preventDefault()}
+  else if(e.key==='Enter'&&document.activeElement===document.body){openDetail();e.preventDefault()}
+});
+
+window.addEventListener('wheel',function(e){
+  if(isOpen)return;
+  const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+  T+=delta/(ws+gap)*.5;
+  clearTimeout(wheelTimer);
+  wheelTimer=setTimeout(()=>{T=Math.round(T)},160);
+},{passive:true});
+
+shelf.addEventListener('pointerdown',function(e){
+  if(isOpen)return;
+  drag={x0:e.clientX,T0:T,moved:false,id:e.pointerId};
+  try{shelf.setPointerCapture(e.pointerId)}catch(err){}
+});
+window.addEventListener('pointermove',function(e){
+  mx=e.clientX;my=e.clientY;
+  if(drag){
+    const dx=e.clientX-drag.x0;
+    if(Math.abs(dx)>5)drag.moved=true;
+    if(drag.moved)T=drag.T0-dx/(ws+gap);
+  }
+});
+window.addEventListener('pointerup',function(){
+  if(!drag)return;
+  if(drag.moved){
+    T=Math.round(T);
+    suppressClick=true;
+    setTimeout(()=>{suppressClick=false},0);
+  }
+  drag=null;
+});
+document.addEventListener('pointerover',function(e){overControl=!!e.target.closest('button,a')});
+window.addEventListener('resize',function(){measure();updateTabs(active)});
+
+/* ---------------- frame loop ---------------- */
+let last=performance.now();
+function frame(now){
+  const dt=Math.min((now-last)/1000,.05);last=now;
+
+  const k=drag&&drag.moved?18:(reduce?1:5.2);
+  s+=(T-s)*(1-Math.exp(-k*dt));
+  if(Math.abs(T-s)<1e-4)s=T;
+  if(Math.abs(s)>144){const loops=Math.trunc(s/36);s-=loops*36;T-=loops*36}
+
+  const ai=mod(Math.round(s),12);
+  if(ai!==active){
+    let dir=Math.sign(T-s)||lastDir;
+    if(dir!==0)lastDir=dir;
+    setActive(ai,dir);
+  }
+
+  const coverX=window.innerWidth/2,coverY=window.innerHeight/2;
+  onCover=!isOpen&&Math.abs(mx-coverX)<.55*d&&Math.abs(my-coverY)<.55*H&&Math.abs(T-s)<.3;
+  const tyTarget=onCover?(mx-coverX)/(.55*d)*9:(mx-coverX)/window.innerWidth*5;
+  const txTarget=onCover?-(my-coverY)/(H/2)*6:0;
+  const te=1-Math.exp(-7*dt);
+  tiltY+=(tyTarget-tiltY)*te;
+  tiltX+=(txTarget-tiltX)*te;
+
+  const le=1-Math.exp(-12*dt);
+  for(let n=0;n<tapes.length;n++){
+    const t=tapes[n],r=relIndex(t.v),ar=Math.abs(r);
+    const x=r*(ws+gap)+(d-ws+1.6*gap)*B(r);
+    if(Math.abs(x)>window.innerWidth/2+1.5*d){t.el.style.visibility='hidden';continue}
+    t.el.style.visibility='visible';
+    const liftTarget=(hover===t.v&&ar>.5&&!isOpen)?1:0;
+    lifts[t.v]+=(liftTarget-lifts[t.v])*le;
+    const o=smooth(Math.max(0,1-ar));
+    const y=-o*.025*H-lifts[t.v]*.045*H;
+    const z=o*.2*H;
+    t.el.style.transform='translate3d('+x+'px,'+y+'px,'+z+'px) rotateZ('+(-4.5*o)+'deg) rotateX('+(tiltX*o)+'deg) rotateY('+(-90*o+tiltY*o)+'deg)';
+    t.el.style.zIndex=String(Math.round(100-ar*4));
+    t.sp.style.setProperty('--shade',o*.55);
+    t.cv.style.setProperty('--shade',(1-o)*.5);
+  }
+
+  const sc=isOpen?0:smooth(Math.max(0,1-Math.abs(T-s)*3));
+  play.style.transform='scale('+sc+')';
+
+  cx+=(mx-cx)*(1-Math.exp(-16*dt));
+  cy+=(my-cy)*(1-Math.exp(-16*dt));
+  cursor.style.transform='translate3d('+(cx-29)+'px,'+(cy-29)+'px,0)';
+  let state='';
+  if(!isOpen){
+    if(onCover)state='open';
+    else if(hover>=0&&Math.abs(relIndex(hover))>.5)state='spine';
+    else if(overControl)state='btn';
+  }
+  cursor.className='cursor'+(state?' '+state:'');
+
+  if(inkActive){
+    const el=now-inkStart;
+    blobEls.forEach(function(c,i){
+      const p=clamp((el-520-BLOBS[i].delay)/1250,0,1);
+      c.setAttribute('r',720*(1-Math.pow(1-p,3)));
+    });
+    if(el>2400)inkActive=false;
+  }
+  requestAnimationFrame(frame);
+}
+
+measure();
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

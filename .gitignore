@@ -1,0 +1,4 @@
+.workbuddy/
+*.genie
+*.png
+.DS_Store
